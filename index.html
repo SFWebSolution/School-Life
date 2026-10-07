@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Campus Life — Nigerian University Life Simulator (Unilorin & Unilag)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/campus-style.css">
+</head>
+<body class="time-morning">
+
+  <div class="ambient-halo"></div>
+
+  <!-- Main Game Container -->
+  <div id="app-container">
+
+    <!-- Top Game Header -->
+    <header class="game-header">
+      <div class="school-badge">
+        <div class="school-logo-icon">🏛️</div>
+        <div>
+          <div class="school-title" id="school-title">UNILORIN • Tunde</div>
+          <div class="school-subtitle" id="school-subtitle">Better By Far (200L Comp Sci)</div>
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+        <div class="auth-badge" id="auth-badge"><span>👤</span> Sign In</div>
+        <div class="clock-widget">
+          <div class="clock-time" id="clock-time">08:30</div>
+          <div class="clock-phase" id="clock-phase">Morning • Day 14</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Core 6-Stat Meters (Energy, Hunger, Hygiene, Social/Fun, Health, CGPA) -->
+    <section class="meters-bar">
+      <div class="meter-card">
+        <div class="meter-header">
+          <span>⚡ Energy</span>
+          <span id="val-energy" style="color:#ffab00;">85%</span>
+        </div>
+        <div class="meter-bar-track">
+          <div class="meter-bar-fill fill-energy" id="fill-energy" style="width: 85%;"></div>
+        </div>
+      </div>
+
+      <div class="meter-card">
+        <div class="meter-header">
+          <span>🍔 Hunger</span>
+          <span id="val-hunger" style="color:#ff5722;">70%</span>
+        </div>
+        <div class="meter-bar-track">
+          <div class="meter-bar-fill fill-hunger" id="fill-hunger" style="width: 70%;"></div>
+        </div>
+      </div>
+
+      <div class="meter-card">
+        <div class="meter-header">
+          <span>🚿 Clean</span>
+          <span id="val-hygiene" style="color:#00b0ff;">80%</span>
+        </div>
+        <div class="meter-bar-track">
+          <div class="meter-bar-fill fill-hygiene" id="fill-hygiene" style="width: 80%;"></div>
+        </div>
+      </div>
+
+      <div class="meter-card">
+        <div class="meter-header">
+          <span>🎉 Fun</span>
+          <span id="val-fun" style="color:#d500f9;">65%</span>
+        </div>
+        <div class="meter-bar-track">
+          <div class="meter-bar-fill fill-fun" id="fill-fun" style="width: 65%;"></div>
+        </div>
+      </div>
+
+      <div class="meter-card">
+        <div class="meter-header">
+          <span>💊 Health</span>
+          <span id="val-health" style="color:#ff1744;">95%</span>
+        </div>
+        <div class="meter-bar-track">
+          <div class="meter-bar-fill fill-health" id="fill-health" style="width: 95%;"></div>
+        </div>
+      </div>
+
+      <div class="meter-card">
+        <div class="meter-header">
+          <span>📚 CGPA</span>
+          <span id="val-cgpa" style="color:#00e676;">3.45</span>
+        </div>
+        <div class="meter-bar-track">
+          <div class="meter-bar-fill fill-cgpa" id="fill-cgpa" style="width: 69%;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Wallet, Vehicle & Semester Floating Pill -->
+    <div class="wallet-pill">
+      <div>
+        <div class="wallet-label" style="font-size:10px; text-transform:uppercase; color:var(--text-muted); font-weight:700;">PalmPay Balance</div>
+        <div class="wallet-amount" id="wallet-amount">₦12,000</div>
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:flex-end; gap:3px;">
+        <div class="story-academic-badge" id="semester-badge">Week 1 • 100L</div>
+        <div class="vehicle-badge" id="vehicle-badge"><span>🚶</span> Leggedis Benz</div>
+      </div>
+    </div>
+
+    <!-- Viewport Views Switcher Tabs -->
+    <div class="view-tabs-header">
+      <button class="view-tab-btn active" id="tab-btn-map" onclick="UI.switchViewportView('map')">
+        <span>🗺️</span> Campus Map
+      </button>
+      <button class="view-tab-btn" id="tab-btn-room" onclick="UI.switchViewportView('room')">
+        <span>🏠</span> My Room
+      </button>
+      <button class="view-tab-btn" id="tab-btn-actions" onclick="UI.switchViewportView('actions')">
+        <span>⚡</span> Actions
+      </button>
+    </div>
+
+    <!-- Scrollable Main Campus Viewport -->
+    <main class="main-viewport">
+
+      <!-- VIEW 1: Campus Interactive Visual World Map (Alive 2D Campus World) -->
+      <section class="campus-visual-map" id="campus-map-view">
+        <div class="map-header">
+          <div>
+            <div class="map-title" id="map-uni-title"><span>🏛️</span> Unilorin Campus Map</div>
+            <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Tap any campus building to travel. Watch your avatar move along roads!</div>
+          </div>
+          <div class="map-student-density" id="map-current-loc-badge">📍 Tanke Junction</div>
+        </div>
+
+        <!-- The 2D World Map Interactive Stage -->
+        <div class="campus-world-stage" id="campus-world-stage">
+          <!-- Animated Roads & Water Terrain SVG -->
+          <svg class="map-terrain-svg" id="map-terrain-svg" viewBox="0 0 1000 650" preserveAspectRatio="none">
+            <!-- Rendered dynamically by UI.renderVisualMap() -->
+          </svg>
+
+          <!-- Interactive Landmark Building Nodes Layer -->
+          <div class="map-buildings-layer" id="map-buildings-layer">
+            <!-- Buildings injected dynamically with (x, y) coordinates -->
+          </div>
+
+          <!-- Animated Virtual Player Avatar Token -->
+          <div class="player-map-avatar" id="player-map-avatar">
+            <div class="player-avatar-nametag" id="player-avatar-nametag">🧑‍🎓 Tunde</div>
+            <div class="player-avatar-sprite" id="player-avatar-sprite">🚶‍♂️</div>
+            <div class="player-avatar-pulse"></div>
+          </div>
+
+          <!-- Transit HUD Banner (Shown while moving between landmarks) -->
+          <div class="map-transit-hud" id="map-transit-hud" style="display:none;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span class="transit-icon" id="transit-hud-icon" style="font-size:22px;">🚕</span>
+              <div style="flex:1;">
+                <div class="transit-title" id="transit-hud-title" style="font-size:12.5px; font-weight:800; color:#fff;">Heading to CBT Centre...</div>
+                <div class="transit-sub" id="transit-hud-sub" style="font-size:10.5px; color:var(--cyan);">Boarded Tanke Keke (₦150)</div>
+              </div>
+            </div>
+            <div class="transit-progress"><div class="transit-progress-bar" id="transit-progress-bar"></div></div>
+          </div>
+        </div>
+
+        <!-- Selected Landmark Quick Action Drawer -->
+        <div class="landmark-drawer" id="landmark-drawer" style="display:none;">
+          <div class="landmark-drawer-header">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span class="landmark-drawer-icon" id="drawer-landmark-icon" style="font-size:24px;">📍</span>
+              <div>
+                <div class="landmark-drawer-title" id="drawer-landmark-name" style="font-size:14px; font-weight:800; color:#fff;">Tanke Junction</div>
+                <div class="landmark-drawer-tag" id="drawer-landmark-tag" style="font-size:11px; color:var(--primary); font-weight:700;">Off-Campus Hub</div>
+              </div>
+            </div>
+            <button class="landmark-drawer-close" onclick="UI.closeLandmarkDrawer()" style="background:none; border:none; color:var(--text-muted); font-size:18px; cursor:pointer;">✕</button>
+          </div>
+          <div class="landmark-drawer-desc" id="drawer-landmark-desc" style="font-size:11.5px; color:var(--text-muted); line-height:1.4;">
+            Commercial hub packed with Keke queues, Tanke Amala joints, supermarkets, POS stands, and morning hold-up.
+          </div>
+          <div class="landmark-drawer-actions" id="drawer-landmark-actions" style="display:flex; flex-direction:column; gap:6px; margin-top:4px;">
+            <!-- Contextual Actions injected dynamically -->
+          </div>
+        </div>
+
+        <!-- Collapsible Landmark Directory List -->
+        <details class="campus-directory-accordion" style="margin-top:6px;">
+          <summary style="font-size:12px; font-weight:700; color:var(--text-muted); cursor:pointer; padding:6px 0;">📋 View Campus Landmarks Directory</summary>
+          <div class="map-pins-container" id="map-pins-container" style="margin-top:8px;">
+            <!-- Landmark Cards injected dynamically -->
+          </div>
+        </details>
+      </section>
+
+      <!-- VIEW 2: Player Housing & Hostel Room Interior -->
+      <section class="player-house-card" id="player-room-view" style="display:none;">
+        <div class="house-header">
+          <div class="house-title" id="house-title"><span>🏠</span> Hostel Squatter Bunk</div>
+          <div class="house-rent-status" id="house-rent-status">Rent Free (Squatting)</div>
+        </div>
+        <div style="font-size:12px; color:var(--text-muted); line-height:1.4;" id="house-desc">
+          8 coursemates sharing a room. Boiling rings everywhere, light fluctuates, but rent is zero.
+        </div>
+        <div style="font-size:11px; font-weight:800; color:var(--accent); text-transform:uppercase; margin-top:2px;">
+          🛏️ Room Survival Actions:
+        </div>
+        <div class="house-appliances-grid">
+          <button class="room-action-btn" onclick="takeShower()">
+            <span style="font-size:22px;">🚿</span>
+            <span>Cold Shower</span>
+            <span style="font-size:9.5px; color:var(--cyan);">100% Hygiene</span>
+          </button>
+          <button class="room-action-btn" onclick="sleepInRoom()">
+            <span style="font-size:22px;">🛏️</span>
+            <span>Sleep on Bed</span>
+            <span style="font-size:9.5px; color:var(--accent);">100% Energy</span>
+          </button>
+          <button class="room-action-btn" onclick="cookConcoctionRice()">
+            <span style="font-size:22px;">🍲</span>
+            <span>Cook Pot Rice</span>
+            <span style="font-size:9.5px; color:var(--primary);">+55 Hunger (₦800)</span>
+          </button>
+        </div>
+        <button class="action-btn" style="width:100%; align-items:center; background:rgba(0,230,118,0.12); border-color:var(--primary); color:var(--primary); font-weight:800; cursor:pointer;" onclick="UI.openHousingUpgradeSelector()">
+          🏘️ Upgrade Housing (Rent Self-Contain / Luxury Flat)
+        </button>
+      </section>
+
+      <!-- VIEW 3: Campus Actions Section -->
+      <section id="campus-actions-view" style="display:none;">
+        <!-- Current Location Card -->
+        <div class="location-card" style="margin-bottom:12px;">
+          <div class="location-top">
+            <div class="location-name" id="location-name"><span>📍</span> Tanke Junction</div>
+            <div class="location-tag" id="location-tag">Off-Campus Hub</div>
+          </div>
+          <div class="location-desc" id="location-desc">Commercial hub packed with Keke queues, student food joints, POS stands, and Tanke hold-up.</div>
+        </div>
+
+        <div class="actions-section-title">⚡ Instant Academic &amp; Social Choices</div>
+        <div class="actions-grid">
+          <button class="action-btn" onclick="attendLecture()">
+            <span class="action-icon">🎓</span>
+            <span class="action-title">Attend 2h Lecture</span>
+            <span class="action-costs">
+              <span class="cost-neg">-20⚡</span>
+              <span class="cost-neg">-15🍔</span>
+              <span class="cost-pos">+0.08📚</span>
+            </span>
+          </button>
+
+          <button class="action-btn" onclick="readNightClass()">
+            <span class="action-icon">📖</span>
+            <span class="action-title">TDB Night Class</span>
+            <span class="action-costs">
+              <span class="cost-neg">-35⚡</span>
+              <span class="cost-neg">-20🍔</span>
+              <span class="cost-pos">+0.22📚</span>
+            </span>
+          </button>
+
+          <button class="action-btn" onclick="takeShower()">
+            <span class="action-icon">🚿</span>
+            <span class="action-title">Hostel Shower</span>
+            <span class="action-costs">
+              <span class="cost-pos">100%🚿</span>
+              <span class="cost-pos">+10⚡</span>
+            </span>
+          </button>
+
+          <button class="action-btn" onclick="visitClinic()">
+            <span class="action-icon">🏥</span>
+            <span class="action-title">Visit Health Centre</span>
+            <span class="action-costs">
+              <span class="cost-pos">100%💊</span>
+              <span class="cost-neg">-₦1,500</span>
+            </span>
+          </button>
+
+          <button class="action-btn" onclick="partyNight()">
+            <span class="action-icon">🕺</span>
+            <span class="action-title">Club &amp; Nightlife</span>
+            <span class="action-costs">
+              <span class="cost-neg">-₦8,000</span>
+              <span class="cost-pos">100%🎉</span>
+            </span>
+          </button>
+
+          <button class="action-btn" onclick="openPhone()">
+            <span class="action-icon">📱</span>
+            <span class="action-title">CampusPhone OS</span>
+            <span class="action-costs">
+              <span style="color:var(--cyan);">PalmPay, Eats &amp; Chitter</span>
+            </span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Live Campus Activity Log Stream -->
+      <section class="activity-feed-card">
+        <div class="feed-header">
+          <span>📡 Live Campus Activity Feed</span>
+          <span style="font-size: 10px; color: var(--text-muted);">Auto-updating</span>
+        </div>
+        <div class="feed-logs" id="feed-logs">
+          <!-- Dynamic Logs injected by JS -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Floating Phone Trigger Button -->
+    <div class="phone-floating-btn" id="phone-floating-btn" title="Open CampusPhone">
+      📱
+      <div class="phone-badge-ping"></div>
+    </div>
+
+    <!-- Bottom Dock Navigation Bar -->
+    <nav class="bottom-dock">
+      <button class="dock-btn active" data-tab="campus">
+        <span class="dock-icon">🏛️</span>
+        <span class="dock-label">Campus</span>
+      </button>
+
+      <button class="dock-btn" data-tab="map">
+        <span class="dock-icon">🗺️</span>
+        <span class="dock-label">Locations</span>
+      </button>
+
+      <button class="dock-btn" data-tab="hustle">
+        <span class="dock-icon">💼</span>
+        <span class="dock-label">Hustles</span>
+      </button>
+
+      <button class="dock-btn" data-tab="profile">
+        <span class="dock-icon">🎓</span>
+        <span class="dock-label">Portal</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- The In-Game Smartphone Modal (CampusPhone 16) -->
+  <div class="phone-modal" id="phone-modal">
+    <div class="phone-chassis">
+      <div class="phone-island">
+        <div class="phone-island-cam"></div>
+      </div>
+
+      <div class="phone-status-bar">
+        <span>MTN 5G</span>
+        <span id="phone-time-clock">08:30</span>
+        <span>100% 🔋</span>
+      </div>
+
+      <div class="phone-screen">
+
+        <!-- Phone Home Screen -->
+        <div id="phone-home-screen">
+          <div class="phone-home-header">
+            <div class="phone-time-huge" id="phone-time-huge">08:30</div>
+            <div class="phone-date-huge" id="phone-date-clock">Day 14 • Semester Week 6</div>
+          </div>
+
+          <div class="app-grid">
+            <div class="app-icon-item" data-app="whatschat">
+              <div class="app-icon-box bg-whatschat">
+                💬
+                <div class="app-unread-badge" id="whatschat-badge" style="display:none;">3</div>
+              </div>
+              <div class="app-icon-name">WhatsUni</div>
+            </div>
+
+            <div class="app-icon-item" data-app="palmpay">
+              <div class="app-icon-box bg-palmpay">💳</div>
+              <div class="app-icon-name">PalmPay</div>
+            </div>
+
+            <div class="app-icon-item" data-app="chowdeck">
+              <div class="app-icon-box bg-chowdeck">🍲</div>
+              <div class="app-icon-name">ChowCampus</div>
+            </div>
+
+            <div class="app-icon-item" data-app="chitter">
+              <div class="app-icon-box bg-chitter">🐦</div>
+              <div class="app-icon-name">Chitter</div>
+            </div>
+
+            <div class="app-icon-item" data-app="hustle">
+              <div class="app-icon-box bg-hustle">💼</div>
+              <div class="app-icon-name">Hustles</div>
+            </div>
+
+            <div class="app-icon-item" data-app="portal">
+              <div class="app-icon-box bg-portal">🎓</div>
+              <div class="app-icon-name">Portal</div>
+            </div>
+
+            <div class="app-icon-item" data-app="settings">
+              <div class="app-icon-box bg-settings">🔄</div>
+              <div class="app-icon-name">New Life</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inside App: WhatsUni (Campus WhatsApp & DMs) -->
+        <div class="phone-app-window" id="app-whatschat">
+          <div class="app-window-header" style="justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <button class="app-back-btn" id="whatschat-back-btn">←</button>
+              <div class="app-window-title" id="whatschat-title">WhatsUni 💬</div>
+            </div>
+            <span style="font-size:11px; color:#25D366; font-weight:700;" id="whatschat-header-status">Online</span>
+          </div>
+
+          <!-- Contacts View -->
+          <div id="whatschat-contacts-view">
+            <div style="font-size:11.5px; color:var(--text-muted); margin-bottom:10px; font-weight:600;">Campus DMs &amp; Group Chats</div>
+            <div class="chat-contacts-list" id="whatschat-contacts-list"></div>
+          </div>
+
+          <!-- Conversation View -->
+          <div id="whatschat-convo-view" style="display:none; flex-direction:column; height:100%;">
+            <div class="chat-messages-container" id="whatschat-messages-box"></div>
+            <div class="chat-reply-actions" id="whatschat-replies-box"></div>
+            <div class="chat-input-bar" id="whatschat-input-bar" style="display:none; padding:8px 10px; border-top:1px solid rgba(255,255,255,0.1); background:rgba(18,22,36,0.95); gap:6px; align-items:center;">
+              <input type="text" id="whatschat-live-input" class="form-input" style="flex:1; padding:8px 12px; font-size:12.5px; border-radius:20px;" placeholder="Message coursemates online...">
+              <button id="whatschat-live-send-btn" class="action-btn" style="background:var(--primary); color:#000; font-weight:800; border:none; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="UI.sendLiveChatMessage()">➤</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inside App: PalmPay / Kuda Bank -->
+        <div class="phone-app-window" id="app-palmpay">
+          <div class="app-window-header">
+            <button class="app-back-btn">←</button>
+            <div class="app-window-title">PalmPay Campus Bank</div>
+          </div>
+          <div class="meter-card" style="padding: 16px; margin-bottom: 12px; background: linear-gradient(135deg, #7928ca, #3b0066);">
+            <div style="font-size: 11px; text-transform: uppercase; color: rgba(255,255,255,0.7);">Available Balance</div>
+            <div style="font-size: 26px; font-weight: 900; color: #fff;" id="palmpay-balance">₦12,000</div>
+            <div style="font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 4px;">Tier 3 Student Account Verified</div>
+          </div>
+          <button class="action-btn" style="width: 100%; margin-bottom: 8px; align-items: center; background: rgba(0, 230, 118, 0.15); border-color: var(--primary); color: var(--primary); font-weight: 800; cursor: pointer;" onclick="alert('Sent ₦5,000 urgent allowance to coursemate!')">
+            💸 Send Money / Transfer
+          </button>
+          <button class="action-btn" style="width: 100%; align-items: center; background: rgba(255, 171, 0, 0.15); border-color: var(--accent); color: var(--accent); font-weight: 800; cursor: pointer;" onclick="game.stats.cash += 10000; game.stats.debt += 12000; UI.renderAll(); alert('Emergency ₦10,000 soft loan credited! Payback ₦12,000 at end of semester.');">
+            ⚡ Take Emergency ₦10k Student Loan
+          </button>
+        </div>
+
+        <!-- Inside App: ChowCampus (Food Delivery) -->
+        <div class="phone-app-window" id="app-chowdeck">
+          <div class="app-window-header">
+            <button class="app-back-btn">←</button>
+            <div class="app-window-title">ChowCampus Food Delivery</div>
+          </div>
+          <div id="chowdeck-food-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+        </div>
+
+        <!-- Inside App: Chitter (Campus Twitter/X & Gossip) -->
+        <div class="phone-app-window" id="app-chitter">
+          <div class="app-window-header">
+            <button class="app-back-btn">←</button>
+            <div class="app-window-title">Chitter 9ja Campus Trends</div>
+          </div>
+          <div style="display:flex; gap:8px; margin-bottom:12px;">
+            <input type="text" id="chitter-input" class="form-input" style="flex:1; padding:10px;" placeholder="What's happening on campus?">
+            <button id="chitter-send-btn" class="action-btn" style="background:var(--cyan); color:#000; font-weight:800; border:none; padding:10px 14px; border-radius:12px; cursor:pointer;">Tweet</button>
+          </div>
+          <div id="chitter-posts-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+        </div>
+
+        <!-- Inside App: Campus Hustles -->
+        <div class="phone-app-window" id="app-hustle">
+          <div class="app-window-header">
+            <button class="app-back-btn">←</button>
+            <div class="app-window-title">Campus Side Gigs &amp; Hustles</div>
+          </div>
+          <div id="hustle-jobs-list"></div>
+        </div>
+
+        <!-- Inside App: Student Portal -->
+        <div class="phone-app-window" id="app-portal">
+          <div class="app-window-header">
+            <button class="app-back-btn">←</button>
+            <div class="app-window-title">University Academic Portal</div>
+          </div>
+          <div class="meter-card" style="padding: 16px; margin-bottom: 12px; text-align: center;">
+            <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Current Cumulative GPA</div>
+            <div style="font-size: 38px; font-weight: 900; color: var(--primary);" id="portal-cgpa-score">3.42</div>
+            <div style="font-size: 13px; font-weight: 700; color: #fff; margin-top: 4px;" id="portal-standing-text">Second Class Upper (2:1)</div>
+          </div>
+          <button class="action-btn" style="width: 100%; align-items: center; background: rgba(0, 230, 118, 0.15); border-color: var(--primary); color: #fff; font-weight: 700; cursor: pointer;" onclick="alert('School fees paid and course form endorsed by Departmental Course Adviser!')">
+            📄 Register 22 Credit Units
+          </button>
+        </div>
+
+        <!-- Inside App: Settings / New Life -->
+        <div class="phone-app-window" id="app-settings">
+          <div class="app-window-header">
+            <button class="app-back-btn">←</button>
+            <div class="app-window-title">Settings &amp; Options</div>
+          </div>
+          <button class="action-btn" style="width: 100%; align-items: center; background: rgba(255, 51, 102, 0.15); border-color: var(--danger); color: var(--danger); font-weight: 800; cursor: pointer;" onclick="if(confirm('Are you sure you want to drop out and start a fresh campus life?')) { localStorage.removeItem('campus_life_save'); location.reload(); }">
+            🔄 Drop Out &amp; Restart Fresh Life
+          </button>
+        </div>
+
+      </div>
+
+      <div class="phone-home-bar" id="phone-home-bar" title="Swipe to close"></div>
+    </div>
+  </div>
+
+  <!-- Character Spawn Screen (New Life Creation) -->
+  <div class="spawn-screen" id="spawn-screen" style="display: none;">
+    <div class="spawn-header">
+      <h1>🎓 Campus Life</h1>
+      <p>The Ultimate Nigerian University Simulation Game (Unilorin &amp; Unilag)</p>
+    </div>
+
+    <div class="spawn-form">
+      <!-- Live Character Preview Card -->
+      <div class="avatar-creation-preview-card" id="avatar-preview-card" style="display:flex; align-items:center; gap:14px; background:linear-gradient(135deg, rgba(0,230,118,0.12), rgba(0,240,255,0.08)); border:2px solid var(--primary); border-radius:20px; padding:14px; margin-bottom:4px;">
+        <div id="spawn-avatar-display" style="width:58px; height:58px; border-radius:18px; background:#14182b; border:2px solid var(--cyan); display:flex; align-items:center; justify-content:center; font-size:32px; box-shadow:0 0 20px var(--primary-glow);">👨🏾‍💻</div>
+        <div style="flex:1;">
+          <div id="spawn-preview-name" style="font-size:16px; font-weight:900; color:#fff;">Tunde</div>
+          <div id="spawn-preview-details" style="font-size:11.5px; color:var(--text-muted); line-height:1.4;">Male (Guy Man) • Low Fade &amp; Waves • Streetwear</div>
+          <div id="spawn-preview-dept" style="font-size:11px; color:var(--primary); font-weight:700;">UNILORIN • Computer Science</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Student Name</label>
+        <input type="text" id="spawn-name" class="form-input" value="Tunde" placeholder="Enter student name" oninput="UI.updateAvatarPreview()">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Student Gender</label>
+        <input type="hidden" id="spawn-gender" value="male">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div class="gender-card selected" id="gender-card-male" onclick="UI.selectSpawnGender('male')">
+            <div style="font-size:26px;">👨🏾</div>
+            <div style="font-weight:800; font-size:13px; color:#fff;">Male</div>
+            <div style="font-size:10px; color:var(--text-muted);">Guy Man / Baller</div>
+          </div>
+          <div class="gender-card" id="gender-card-female" onclick="UI.selectSpawnGender('female')">
+            <div style="font-size:26px;">👩🏾</div>
+            <div style="font-weight:800; font-size:13px; color:#fff;">Female</div>
+            <div style="font-size:10px; color:var(--text-muted);">Baddie / Fine Girl</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Hairstyle &amp; Appearance</label>
+        <select id="spawn-hair" class="form-input" onchange="UI.updateAvatarPreview()">
+          <option value="fade">💈 Low Fade &amp; Waves (Guy Man / Fresh Cut)</option>
+          <option value="locks">🧑🏾‍🦱 Dreadlocks &amp; Twists (Alté Creative / Tech Bro)</option>
+          <option value="scholar">👨🏾‍💼 Clean Shave &amp; Glasses (Serious First Class)</option>
+          <option value="cap">🧢 Senator Cap &amp; Agbada (Campus Big Boy / Politician)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Campus Fashion Drip</label>
+        <select id="spawn-drip" class="form-input" onchange="UI.updateAvatarPreview()">
+          <option value="streetwear">👕 Streetwear &amp; White Sneakers (Everyday Lecture Drip)</option>
+          <option value="corporate">👔 Corporate Professional (Law &amp; Banking Sharp Drip)</option>
+          <option value="native">🥻 Cultural Native / Senator (Weekend Party Baller)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Select University</label>
+        <select id="spawn-uni" class="form-input">
+          <option value="unilorin">University of Ilorin (Better By Far - Tanke, PS, CBT)</option>
+          <option value="unilag">University of Lagos (Akoka - New Hall, Lagoon Front)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Department / Course of Study</label>
+        <select id="spawn-dept" class="form-input">
+          <optgroup label="Faculty of Science & Computing">
+            <option value="Computer Science">Computer Science</option>
+            <option value="Software Engineering">Software Engineering</option>
+            <option value="Cyber Security">Cyber Security</option>
+            <option value="Microbiology">Microbiology</option>
+            <option value="Biochemistry">Biochemistry</option>
+          </optgroup>
+          <optgroup label="Faculty of Engineering">
+            <option value="Mechanical Engineering">Mechanical Engineering</option>
+            <option value="Electrical & Electronics Engineering">Electrical &amp; Electronics Engineering</option>
+            <option value="Civil Engineering">Civil Engineering</option>
+          </optgroup>
+          <optgroup label="College of Health Sciences">
+            <option value="Medicine & Surgery">Medicine &amp; Surgery (MBBS)</option>
+            <option value="Pharmacy">Pharmacy (PharmD)</option>
+            <option value="Nursing Science">Nursing Science</option>
+            <option value="Medical Laboratory Science">Medical Laboratory Science</option>
+          </optgroup>
+          <optgroup label="Faculty of Law">
+            <option value="Common & Islamic Law">Law (LL.B)</option>
+          </optgroup>
+          <optgroup label="Faculty of Management & Social Sciences">
+            <option value="Accounting">Accounting</option>
+            <option value="Economics">Economics</option>
+            <option value="Mass Communication">Mass Communication</option>
+            <option value="Business Administration">Business Administration</option>
+            <option value="Political Science">Political Science</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Choose Your Spawn Background</label>
+        <input type="hidden" id="selected-class" value="trench">
+
+        <div class="spawn-class-cards">
+          <!-- Nepo Baby -->
+          <div class="class-card" data-class="nepo">
+            <div class="class-card-header">
+              <span class="class-card-title">👑 Nepo Baby (Rich Kid)</span>
+              <span class="class-perk-badge" style="color:var(--cyan);">₦850,000 Bank</span>
+            </div>
+            <div class="class-card-desc">iPhone 16 Pro Max, 2-bedroom luxury off-campus flat, high starting clout. But high peer pressure and fake friends beg for money 24/7.</div>
+          </div>
+
+          <!-- Trench Grinder -->
+          <div class="class-card selected" data-class="trench">
+            <div class="class-card-header">
+              <span class="class-card-title">⚡ Trench Grinder (Lapo Hustler)</span>
+              <span class="class-perk-badge" style="color:var(--accent);">₦4,500 Bank</span>
+            </div>
+            <div class="class-card-desc">Cracked Android, squatting in hostel with 6 coursemates. Must do campus hustles (POS, assignment writing, crypto) to pay handouts and survive.</div>
+          </div>
+
+          <!-- The Scholar -->
+          <div class="class-card" data-class="scholar">
+            <div class="class-card-header">
+              <span class="class-card-title">📚 The Scholar (Jambite Genius)</span>
+              <span class="class-perk-badge" style="color:var(--primary);">4.88 CGPA</span>
+            </div>
+            <div class="class-card-desc">First class academic headstart, library rat, study group leader. But extreme academic stress and lecture politics can take a toll.</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="start-life-btn" id="start-life-btn">🚀 Begin My Campus Life</button>
+    </div>
+  </div>
+
+  <!-- Random Event Modal (Naija Campus Encounters) -->
+  <div class="event-modal" id="event-modal">
+    <div class="event-box">
+      <div class="event-badge">🚨 Campus Encounter</div>
+      <div class="event-title" id="event-title">Dress Code Marshall Caught You!</div>
+      <div class="event-desc" id="event-desc">A strict lecturer stops you on Walkway and claims your jeans are fitted.</div>
+      <div class="event-options" id="event-options"></div>
+    </div>
+  </div>
+
+  <!-- Interactive 3-Question CBT Exam Simulator Modal -->
+  <div class="cbt-exam-modal" id="cbt-exam-modal" style="display:none;">
+    <div class="cbt-exam-box">
+      <div class="cbt-top-bar">
+        <div class="cbt-logo">💻 CBT EXAM ARENA • <span>PERMANENT SITE</span></div>
+        <div class="cbt-timer" id="cbt-timer">⏳ 01:30</div>
+      </div>
+      <div class="cbt-meta-bar">
+        <div id="cbt-course-code">GST 111: Logic &amp; Campus Lore</div>
+        <div id="cbt-q-counter">Question 1 of 3</div>
+      </div>
+      <div class="cbt-question-text" id="cbt-question-text">Loading question...</div>
+      <div class="cbt-options-list" id="cbt-options-list"></div>
+      <div class="cbt-actions-bar">
+        <button class="cbt-peep-btn" onclick="UI.cbtPeepNeighbor()">👀 Peep Neighbor's Screen</button>
+        <button class="cbt-submit-btn" id="cbt-next-btn" onclick="UI.cbtSubmitQuestion()">Submit Answer →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEPA Power Outage & UP NEPA Modal -->
+  <div class="nepa-modal" id="nepa-modal" style="display:none;">
+    <div class="nepa-box">
+      <div class="nepa-icon" id="nepa-modal-icon">💡</div>
+      <div class="nepa-title" id="nepa-modal-title">NEPA Took Light!</div>
+      <div class="nepa-desc" id="nepa-modal-desc">Total blackout in the hostel! Fans have stopped and boiling rings are dead. What do you do?</div>
+      <div class="nepa-options" id="nepa-modal-options"></div>
+    </div>
+  </div>
+
+  <!-- ASUU Strike Crisis Modal -->
+  <div class="asuu-modal" id="asuu-modal" style="display:none;">
+    <div class="asuu-box">
+      <div class="asuu-breaking-badge">🚨 NIGERIAN CAMPUS BREAKING NEWS</div>
+      <div class="asuu-title">ASUU Commences 3-Week Warning Strike!</div>
+      <div class="asuu-desc">Lecturers have down tools over renegotiated welfare. All lecture theatres are padlocked! What will you do during the strike?</div>
+      <div class="asuu-options" id="asuu-options"></div>
+    </div>
+  </div>
+
+  <!-- 400L Sign-Out Day & Official NYSC Call-Up Letter Modal -->
+  <div class="signout-modal" id="signout-modal" style="display:none;">
+    <div class="signout-box">
+      <div class="signout-header">
+        <h2>🎉 400L SIGN-OUT &amp; NYSC CALL-UP!</h2>
+        <p>You have conquered 4 years of Nigerian University life!</p>
+      </div>
+
+      <div class="white-shirt-card" id="white-shirt-card">
+        <div class="shirt-headline">🎓 SIGNED OUT! OFFICIAL GRADUATE 🎓</div>
+        <div class="shirt-signatures">
+          <span>"TUNDE IS OUT! 🔥"</span>
+          <span>"NO MORE CBT TENSION 💻"</span>
+          <span>"CONGRATS SCHOLAR! 🌟"</span>
+          <span>"BAG OF RICE COST BUT WE MADE IT 🍚"</span>
+          <span>"SIGNED OUT WITH 5.0 ENERGY ⚡"</span>
+        </div>
+      </div>
+
+      <div class="nysc-callup-card" id="nysc-callup-card">
+        <div class="nysc-crest">🇳🇬 NATIONAL YOUTH SERVICE CORPS 🇳🇬</div>
+        <div class="nysc-title">OFFICIAL CALL-UP LETTER FOR MOBILIZATION</div>
+        <div class="nysc-details">
+          <div><strong>Graduate Name:</strong> <span id="nysc-name">Student</span></div>
+          <div><strong>Institution:</strong> <span id="nysc-uni">University of Ilorin</span></div>
+          <div><strong>Discipline:</strong> <span id="nysc-dept">Computer Science</span></div>
+          <div><strong>Final Degree Standing:</strong> <span id="nysc-class" style="color:var(--primary); font-weight:800;">First Class Honours</span></div>
+          <div><strong>State of Deployment:</strong> <span id="nysc-state" style="color:var(--cyan); font-weight:800;">Lagos State (Camp: Iyana Ipaja)</span></div>
+          <div><strong>Monthly Federal Allowance:</strong> <span style="color:#00e676; font-weight:800;">₦77,000 / month</span></div>
+        </div>
+      </div>
+
+      <button class="start-life-btn" onclick="UI.closeSignOutModal()">🏆 Celebrate &amp; Continue Free Roam</button>
+    </div>
+  </div>
+
+  <!-- Welcome & Authentication Portal Modal -->
+  <div class="auth-modal" id="auth-modal">
+    <div class="auth-box">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 style="font-size:20px; font-weight:900; color:#fff;">🎓 Student Portal Gate</h2>
+        <button onclick="handleAuthDismiss()" style="background:none; border:none; color:var(--text-muted); font-size:18px; cursor:pointer;" title="Continue as Guest">✕</button>
+      </div>
+      <p style="font-size:12px; color:var(--text-muted); line-height:1.4;">Sign up to back up your CGPA, PalmPay balance, and campus character across devices — or play instantly as a guest!</p>
+
+      <div class="auth-tabs">
+        <button class="auth-tab-btn active" id="tab-login-btn" onclick="document.getElementById('auth-submit-btn').textContent = 'Sign In'; this.classList.add('active'); document.getElementById('tab-signup-btn').classList.remove('active');">Sign In</button>
+        <button class="auth-tab-btn" id="tab-signup-btn" onclick="document.getElementById('auth-submit-btn').textContent = 'Create Account'; this.classList.add('active'); document.getElementById('tab-login-btn').classList.remove('active');">Sign Up</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" id="auth-email" class="form-input" placeholder="student@campuslife.ng">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" id="auth-password" class="form-input" placeholder="••••••••">
+      </div>
+
+      <button id="auth-submit-btn" class="start-life-btn" style="margin-top:4px;" onclick="handleAuthSubmit()">Sign In</button>
+
+      <div style="text-align:center; font-size:12px; color:var(--text-muted); margin:4px 0;">— OR —</div>
+
+      <button class="action-btn" style="width:100%; align-items:center; background:rgba(255,255,255,0.08); border-color:var(--card-border); color:#fff; font-weight:700; cursor:pointer;" onclick="handleGuestAuth()">
+        🚀 Quick Play as Guest (No Password Required)
+      </button>
+
+      <div id="auth-error-msg" style="font-size:12px; color:var(--danger); text-align:center; display:none;"></div>
+    </div>
+  </div>
+
+  <!-- Game & Cloud Scripts -->
+  <script type="module" src="js/cloud-sync.js"></script>
+  <script src="js/game-engine.js"></script>
+  <script src="js/ui-controller.js"></script>
+  <script>
+    function proceedAfterAuth() {
+      UI.closeAuthModal();
+      const hasSave = localStorage.getItem('campus_life_save');
+      if (!hasSave) {
+        UI.openSpawnModal();
+      } else {
+        UI.renderAll();
+      }
+    }
+
+    function handleAuthDismiss() {
+      const hasSave = localStorage.getItem('campus_life_save');
+      if (!hasSave) {
+        handleGuestAuth();
+      } else {
+        UI.closeAuthModal();
+      }
+    }
+
+    async function handleAuthSubmit() {
+      const email = document.getElementById('auth-email').value.trim();
+      const pass = document.getElementById('auth-password').value.trim();
+      const isSignUp = document.getElementById('tab-signup-btn').classList.contains('active');
+      const errBox = document.getElementById('auth-error-msg');
+
+      if (!email || !pass) {
+        errBox.textContent = 'Please fill in both email and password.';
+        errBox.style.display = 'block';
+        return;
+      }
+
+      errBox.style.display = 'none';
+      if (window.cloudSync) {
+        const res = isSignUp ? await window.cloudSync.signUp(email, pass) : await window.cloudSync.login(email, pass);
+        if (res.success) {
+          proceedAfterAuth();
+        } else {
+          errBox.textContent = res.error || 'Authentication failed.';
+          errBox.style.display = 'block';
+        }
+      } else {
+        // Fallback for offline/local play
+        proceedAfterAuth();
+      }
+    }
+
+    async function handleGuestAuth() {
+      if (window.cloudSync) {
+        try {
+          await window.cloudSync.guestLogin();
+        } catch (e) {
+          console.warn('Guest login fallback:', e);
+        }
+      }
+      proceedAfterAuth();
+    }
+  </script>
+</body>
+</html>
