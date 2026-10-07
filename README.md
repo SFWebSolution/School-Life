@@ -8,7 +8,7 @@
 ## 🎮 Play Instantly in Any Browser
 No app store downloads or high-end device required. Runs smoothly on any mobile browser (Android Chrome, iOS Safari) or desktop computer.
 
-👉 **Play Live**: [https://sfwebsolution.github.io/Neura](https://sfwebsolution.github.io/Neura)
+👉 **Play Live**: [https://sfwebsolution.github.io/School-Life](https://sfwebsolution.github.io/School-Life)
 
 ---
 
